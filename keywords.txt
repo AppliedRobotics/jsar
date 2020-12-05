@@ -1,0 +1,44 @@
+#######################################
+# Syntax Coloring Map For DxlSlave
+####################################### 
+# Object
+#######################################
+
+JsAr	KEYWORD1
+
+#######################################
+# Methods and Functions 
+#######################################	
+
+begin	KEYWORD2
+enableEthernet	KEYWORD2
+disableEthernet	KEYWORD2
+
+enableI2CPins	KEYWORD2
+disableI2CPins	KEYWORD2
+
+enableCanModule	KEYWORD2
+disableCanModule	KEYWORD2 
+disableSpiPins	KEYWORD2 
+enableSpiPins3V3Mode	KEYWORD2
+enableSpiPinsFast3V3Mode	KEYWORD2
+enableSpiPins5VMode	KEYWORD2
+enableSpiPinsFast5VMode	KEYWORD2
+disableSDPort	KEYWORD2
+enableSDPort1BitMode	KEYWORD2
+enableSDPort4BitMode	KEYWORD2
+enableSDPortSpiMode	KEYWORD2
+enableMisoPin	KEYWORD2
+disableMisoPin	KEYWORD2
+enableIrTx	KEYWORD2
+disableIrTx	KEYWORD2
+enableIrRx	KEYWORD2
+disableIrRx	KEYWORD2
+writeMinVoltageToStart	KEYWORD2
+writeMinVoltageToWork	KEYWORD2
+writeLed	KEYWORD2
+replacePin36By25AsOUTPUT	KEYWORD2
+replacePin35By26AsOUTPUT	KEYWORD2
+replacePin36By25AsDAC	KEYWORD2
+replacePin35By26AsDAC	KEYWORD2
+replacePinByExpander	KEYWORD2
