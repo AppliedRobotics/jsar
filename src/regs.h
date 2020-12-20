@@ -1,7 +1,6 @@
 #ifndef __REGS_H
 #define __REGS_H
 
-
 #define MODEL_NUMBER_L             (0)
 #define MODEL_NUMBER_H             (1)
 #define FIRMWARE_VERSION           (2)
@@ -11,20 +10,22 @@
 #define MIN_VOLTAGE_LIMIT          (12)
 #define MIN_VOLTAGE_TO_START       (13)
 #define STATUS_RETURN_LEWEL        (16)
-#define RESET_REG                  (23)
+//#define RESET_REG                  (23)
 
 #define TORQUE_ENABLE              (24)
 #define LED                        (25)
-#define D_GAIN                     (26)
-#define I_GAIN                     (27)
-#define P_GAIN                     (28)
-#define RESET_ENCODERS             (29)
-#define ENCODER_TURN_TICKS		   (30)
-#define D3_D7_PULL_UP_ENABLE       (32)
+#define ENCODER_MODE               (26)
+#define DRIVER_MODE                (27)
+#define MOTOR_CONTROL_MODE         (28)
+#define PID_P                      (29)
+#define PID_I                      (30)
+#define PID_D                      (31)
+#define CONTROL_PERIOD             (32)
+
 //#define                          (34)
 //#define                          (36)
 //#define                          (38)
-//#define                          (40)
+#define DXL_LOCK_RESET_REG         (40)
 
 #define PRESENT_VOLTAGE            (42)
 #define PRESENT_TEMPERATURE        (43)
@@ -38,14 +39,14 @@
 #define GOAL_POSITION_2            (62)
 #define GOAL_POSITION_3            (64)
 #define GOAL_POSITION_4            (66)
-#define MOVING_SPEED_1             (68)
-#define MOVING_SPEED_2             (70)
-#define MOVING_SPEED_3             (72)
-#define MOVING_SPEED_4             (74)
-#define TORQUE_1                   (76)
-#define TORQUE_2                   (78)
-#define TORQUE_3                   (80)
-#define TORQUE_4                   (82)
+#define GOAL_SPEED_1               (68)
+#define GOAL_SPEED_2               (70)
+#define GOAL_SPEED_3               (72)
+#define GOAL_SPEED_4               (74)
+#define POWER_1                    (76)
+#define POWER_2                    (78)
+#define POWER_3                    (80)
+#define POWER_4                    (82)
 #define PRESENT_POSITION_1         (84)
 #define PRESENT_POSITION_2         (86)
 #define PRESENT_POSITION_3         (88)
@@ -54,10 +55,6 @@
 #define PRESENT_SPEED_2            (94)
 #define PRESENT_SPEED_3            (96)
 #define PRESENT_SPEED_4            (98)
-#define PRESENT_LOAD_1             (100)
-#define PRESENT_LOAD_2             (102)
-#define PRESENT_LOAD_3             (104)
-#define PRESENT_LOAD_4             (106)
 
 #define ETHERNET_ENABLE            (110)
 #define ETHERNET_RST               (111)
@@ -68,7 +65,7 @@
 #define I2C_MODE                   (116)
 #define SPI_MODE                   (117)
 #define SD_MODE                    (118)
-#define MOTOR_MODE                 (119)
+#define D3_D7_PULL_UP_ENABLE       (119)
 #define MISO_OUTPUT_EN             (120)
 
 #define A0_MODE        (130)
@@ -143,6 +140,28 @@
 #define I2C_MODE_DISABLED   (0)
 #define I2C_MODE_3V3        (1)
 #define I2C_MODE_5V         (2)
+
+typedef enum
+{
+	DRIVER_MODE_DISABLED = 0,
+	DRIVER_MODE_4_KEYS,
+	DRIVER_MODE_2_H_BRIDGES
+}DRIVER_MODE_t;
+
+typedef enum
+{
+	ENCODER_MODE_DISABLED = 0,
+	ENCODER_MODE_AB,
+	ENCODER_MODE_A,
+	ENCODER_MODE_A_RISING,
+	ENCODER_MODE_SINGLE,
+}ENCODER_MODE_t;
+
+typedef enum
+{
+	CONTROL_MODE_DISABLED = 0,
+	CONTROL_MODE_SPEED
+}CONTROL_MODE_t;
 
 typedef enum
 {
