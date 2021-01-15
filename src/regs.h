@@ -21,6 +21,7 @@
 #define PID_I                      (30)
 #define PID_D                      (31)
 #define CONTROL_PERIOD             (32)
+#define MAX_POWER_LIMIT            (33)
 
 //#define                          (34)
 //#define                          (36)
@@ -67,6 +68,11 @@
 #define SD_MODE                    (118)
 #define D3_D7_PULL_UP_ENABLE       (119)
 #define MISO_OUTPUT_EN             (120)
+
+#define TIM2_PRESCALER             (124)
+#define TIM2_PULSE                 (125)
+#define TIM3_PRESCALER             (127)
+#define TIM3_PULSE                 (128)
 
 #define A0_MODE        (130)
 #define A1_MODE        (131)
@@ -160,7 +166,8 @@ typedef enum
 typedef enum
 {
 	CONTROL_MODE_DISABLED = 0,
-	CONTROL_MODE_SPEED
+	CONTROL_MODE_SPEED,
+	CONTROL_MODE_SPEED_SINGLE
 }CONTROL_MODE_t;
 
 typedef enum

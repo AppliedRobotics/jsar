@@ -21,7 +21,6 @@ void JsArInterface_t::set8(uint8_t addr, uint8_t val)
 
 void JsArInterface_t::set16(uint8_t addr, uint16_t val)
 {
-	Serial.println("Write " + String(addr) + " : " + String(val));
 	while(write(id, addr, val))
 		;
 	regs[addr] = val;

@@ -74,6 +74,19 @@ static const ExpanderPin_t* getExpanderPin(uint8_t pin)
 	return 0;
 }
 
+uint8_t getExpanderTim(uint8_t pin)
+{
+	switch(pin)
+	{
+		case 23: return 2;
+		case 19: return 2;
+		case 18: return 2;
+		case 21: return 3;
+		case 22: return 3;
+	}
+	return 0;
+}
+
 static void 	set8(uint8_t addr, uint8_t val) 	{JsArInterface.set8(addr, val);}
 static void 	set16(uint8_t addr, uint16_t val) 	{JsArInterface.set16(addr, val);}
 static uint8_t 	get8(uint8_t addr)					{return JsArInterface.get8(addr);}
@@ -88,32 +101,25 @@ int JsAr_t::begin(bool isEnableAllPins)
 
 	do
 	{
-		_d();
 		unlockBootloader();
-		_d();
 	}while(JsArInterface.ping(BOOT_ID) != DYN_STATUS_OK);
-	_d();
 	delay(100);
 
 	do
 	{
-		_d();
 		JsArInterface.write(BOOT_ID, DXL_LOCK_RESET_REG, (uint8_t)DXL_RESET_MAGIC);
-		_d();
 		delay(300);
 	}while(JsArInterface.ping(id) != DYN_STATUS_OK);
 
-	Serial.println("hello");
+//	Serial.println("ESP-JS-AR started");
 
 	for(int i = 0; i < 229; i++)
 	{
 		get8(i);
 	}
-_d();
 	set8(ETHERNET_ENABLE, 1);
 	set8(ETHERNET_RST, 1);
 	set8(GPIO_PULL_UP_ENABLE, 1);
-_d();
 	if(isEnableAllPins)
 	{
 		set8(MISO_OUTPUT_EN, 1);
@@ -232,7 +238,7 @@ void JsAr_t::digitalWrite(uint8_t pin, uint8_t value)
 	}
 }
 
-void JsAr_t::analogWrite(uint8_t pin, uint16_t value)
+void JsAr_t::analogWrite(uint8_t pin, uint16_t value, uint16_t range)
 {
 	const ExpanderPin_t* xpin = getExpanderPin(pin);
 	if(!xpin)
@@ -251,10 +257,35 @@ void JsAr_t::analogWrite(uint8_t pin, uint16_t value)
 		case PinMode_ST_INPUT_PULLUP:
 		case PinMode_ST_ADC:
 		case PinMode_ST_PWM:
+			if(range)
+			{
+//				uint8_t tim = getExpanderTim(pin);
+//				uint16_t* tim_pulse = tim == 2? regs + TIM2_PULSE: regs + TIM3_PULSE;
+//				if(tim == 2 && (regs[TIM2_PULSE] != (range & 0xFF) || regs[TIM2_PULSE + 1] != (range >> 8))
+//				{
+//					set16()
+//				}
+			} 
 			set16(xpin->out_reg, value <= 1024? value: 1024);
 			break;
 	}
 }
+
+void JsAr_t::timMode(uint8_t tim, uint8_t prescaler, uint16_t pulse)
+{
+	if(tim == 2)
+	{
+		set8(TIM2_PRESCALER, prescaler);
+		set16(TIM2_PULSE, pulse);
+	}
+	else if(tim == 3)
+	{
+		set8(TIM3_PRESCALER, prescaler);
+		set16(TIM3_PULSE, pulse);
+	}
+}
+
+//void analogWriteFrequency(uint8_t pin, uint16_t value);
 
 int JsAr_t::digitalRead(uint8_t pin)
 {
@@ -312,14 +343,13 @@ void JsAr_t::replacePinByExpander(uint8_t pin)
 
 void JsAr_t::replacePin36By25AsOUTPUT()	{set8(getExpanderPin(36)->mode_reg, PinMode_ESP_OUT);}
 void JsAr_t::replacePin35By26AsOUTPUT()	{set8(getExpanderPin(35)->mode_reg, PinMode_ESP_OUT);}
+void JsAr_t::replacePin34By27AsOUTPUT()	{set8(getExpanderPin(34)->mode_reg, PinMode_ESP_OUT);}
 void JsAr_t::replacePin36By25AsDAC()	{set8(getExpanderPin(36)->mode_reg, PinMode_ESP_DAC);}
 void JsAr_t::replacePin35By26AsDAC()	{set8(getExpanderPin(35)->mode_reg, PinMode_ESP_DAC);}
 
 int JsAr_t::updateFirmware()
 {
 	JsArInterface.begin(1000000);
-	Serial.setTimeout(2000);
-
 	unlockBootloader();
 
 	while(JsArInterface.ping(BOOT_ID) != DYN_STATUS_OK)
@@ -328,7 +358,9 @@ int JsAr_t::updateFirmware()
 	const int BLOCK_SIZE = 128;
 	const int FIRMWARE_CRC_AND_ERASE_CMD_BLOCK_SIZE = 16;
 	const int FW_VERSION = 1;
-
+	
+	Serial.setTimeout(2000);
+	
 	if(JsArInterface.write(BOOT_ID, 1, firmwareData, FIRMWARE_CRC_AND_ERASE_CMD_BLOCK_SIZE) != DYN_STATUS_OK)
 		return -1;
 
@@ -352,23 +384,23 @@ int JsAr_t::updateFirmware()
 	}
 	Serial.println();
 //_d();
+	Serial.setTimeout(10);
 	// get old application dynamixel id
 	uint8_t app_dxl_id;
 	if(JsArInterface.read(BOOT_ID, ID, app_dxl_id) != DYN_STATUS_OK)
 		return -99;
 
-	// reboot
-	for(int i = 0; i < 11; i++)
-	{
-		JsArInterface.write(BOOT_ID, 23, (uint8_t)1);
-	}
+	delay(1000);
+	JsArInterface.write(BOOT_ID, DXL_LOCK_RESET_REG, (uint8_t)DXL_RESET_MAGIC);
+
+	delay(1000);
 
 	for(int i = 0; i < 10; i++)
 	{
 		delay(300);
-		if(JsArInterface.ping(app_dxl_id) == DYN_STATUS_OK)
+		if(JsArInterface.ping(CONTROLLER_ID) == DYN_STATUS_OK)
 		{
-			JsArInterface.write(app_dxl_id, LED, 1);
+			JsArInterface.write(CONTROLLER_ID, LED, 1);
 			return 0; //Success!
 		}
 	}

@@ -4,6 +4,7 @@
 #include "DxlMaster.h"
 #include "DynamixelInterface.h"
 #include "Arduino.h"
+#include "regs.h"
 
 
 class JsArInterface_t : public HardwareDynamixelInterface
