@@ -129,10 +129,10 @@ void JsArMotors_t::speedWriteAll(int16_t speed1, int16_t speed2)
 
 void JsArMotors_t::positionReadAll(int16_t &position1, int16_t &position2)
 {
-	uint8_t data[4];
+	uint8_t data[6];
 	get(PRESENT_POSITION_1, sizeof(data), data);
 	position1 = data[0] | ((uint16_t)data[1] << 8);
-	position2 = data[2] | ((uint16_t)data[3] << 8);
+	position2 = data[4] | ((uint16_t)data[5] << 8);
 }
 
 void JsArMotors_t::speedReadAll(int16_t &speed1, int16_t &speed2)
@@ -143,8 +143,7 @@ void JsArMotors_t::speedReadAll(int16_t &speed1, int16_t &speed2)
 	speed2 = data[2] | ((uint16_t)data[3] << 8);
 }
 
-
-void JsArMotors_t::allRead(int16_t &position1, int16_t &speed1, int16_t &position2, int16_t &speed2)
+void JsArMotors_t::readAll(int16_t &position1, int16_t &speed1, int16_t &position2, int16_t &speed2)
 {
 	uint8_t data[14];
 	get(PRESENT_POSITION_1, sizeof(data), data);
@@ -152,6 +151,14 @@ void JsArMotors_t::allRead(int16_t &position1, int16_t &speed1, int16_t &positio
 	position2 = data[4] | ((uint16_t)data[5] << 8);
 	speed1 = data[8] | ((uint16_t)data[9] << 8);
 	speed2 = data[12] | ((uint16_t)data[13] << 8);
+}
+
+void JsArMotors_t::powerReadAll(int16_t &power1, int16_t &power2)
+{
+	uint8_t data[6];
+	get(POWER_1, sizeof(data), data);
+	power1 = data[0] | ((uint16_t)data[1] << 8);
+	power2 = data[4] | ((uint16_t)data[5] << 8);
 }
 
 

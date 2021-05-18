@@ -111,7 +111,7 @@ int JsAr_t::begin(bool isEnableAllPins)
 		delay(300);
 	}while(JsArInterface.ping(id) != DYN_STATUS_OK);
 
-//	Serial.println("ESP-JS-AR started");
+	Serial.println("ESP-JS-AR started");
 
 	for(int i = 0; i < 229; i++)
 	{
@@ -178,54 +178,31 @@ void JsAr_t::writeMinVoltageToWork(float v)
 
 float JsAr_t::readVoltage() 			{return ((float)get8(PRESENT_VOLTAGE))/10;}
 
-void JsAr_t::writeLed(uint8_t is_en) 	{set8(LED, is_en);}
+void JsAr_t::expanderWriteLed(uint8_t is_en) 	
+										{set8(LED, is_en);}
 
-void JsAr_t::pinMode(uint8_t pin, uint8_t mode)
+void JsAr_t::expanderPinMode(uint8_t pin, uint8_t mode)
 {
 	const ExpanderPin_t* xpin = getExpanderPin(pin);
 	if(!xpin)
-	{
-		::pinMode(pin, mode);
 		return;
-	}
-
-	uint8_t old_mode = regs[xpin->mode_reg];
-	if(old_mode < PinMode_ST_ADC)
-	{
-		::pinMode(pin, mode);
-		return;
-	}
-	
 	switch(mode)
 	{
 		case INPUT: set8(xpin->mode_reg, PinMode_ST_INPUT); break;
 		case INPUT_PULLUP: set8(xpin->mode_reg, PinMode_ST_INPUT_PULLUP); break;
-		case OUTPUT: set8(xpin->mode_reg, PinMode_ST_OUTPUT); Serial.println("hello"); break;
+		case OUTPUT: set8(xpin->mode_reg, PinMode_ST_OUTPUT); break;
 	}
 }
 
-void JsAr_t::digitalWrite(uint8_t pin, uint8_t value)
+void JsAr_t::expanderDigitalWrite(uint8_t pin, uint8_t value)
 {
 	const ExpanderPin_t* xpin = getExpanderPin(pin);
 	if(!xpin)
-	{
-		::digitalWrite(pin, value);
 		return;
-	}
 
 	uint8_t mode = regs[xpin->mode_reg];
 	switch(mode)
 	{
-		case PinMode_DISABLED: 
-		case PinMode_ESP: 
-			::digitalWrite(pin, value);
-			break;
-		case PinMode_ESP_OUT: 
-			if(pin == 36 || pin == 25)
-				::digitalWrite(25, value);
-			else if(pin == 35 || pin == 26)
-				::digitalWrite(26, value);
-			break;
 		case PinMode_ST_PWM:
 			set8(xpin->mode_reg, PinMode_ST_OUTPUT);
 		case PinMode_ST_ADC:
@@ -238,7 +215,7 @@ void JsAr_t::digitalWrite(uint8_t pin, uint8_t value)
 	}
 }
 
-void JsAr_t::analogWrite(uint8_t pin, uint16_t value, uint16_t range)
+void JsAr_t::expanderAnalogWrite(uint8_t pin, uint16_t value)
 {
 	const ExpanderPin_t* xpin = getExpanderPin(pin);
 	if(!xpin)
@@ -247,9 +224,6 @@ void JsAr_t::analogWrite(uint8_t pin, uint16_t value, uint16_t range)
 
 	switch(mode)
 	{
-		case PinMode_DISABLED: 
-		case PinMode_ESP:
-			break;
 		case PinMode_ST_OUTPUT:
 		case PinMode_ST_OUTPUT_OPEN_DRAIN:
 			set8(xpin->mode_reg, PinMode_ST_PWM);
@@ -257,19 +231,133 @@ void JsAr_t::analogWrite(uint8_t pin, uint16_t value, uint16_t range)
 		case PinMode_ST_INPUT_PULLUP:
 		case PinMode_ST_ADC:
 		case PinMode_ST_PWM:
-			if(range)
-			{
-//				uint8_t tim = getExpanderTim(pin);
-//				uint16_t* tim_pulse = tim == 2? regs + TIM2_PULSE: regs + TIM3_PULSE;
-//				if(tim == 2 && (regs[TIM2_PULSE] != (range & 0xFF) || regs[TIM2_PULSE + 1] != (range >> 8))
-//				{
-//					set16()
-//				}
-			} 
 			set16(xpin->out_reg, value <= 1024? value: 1024);
 			break;
 	}
 }
+
+int JsAr_t::expanderDigitalRead(uint8_t pin)
+{
+	const ExpanderPin_t* xpin = getExpanderPin(pin);
+	if(!xpin)
+		return 0;
+	uint8_t mode = regs[xpin->mode_reg];
+	if(mode < PinMode_ST_ADC)
+		return 0;
+	if(mode == PinMode_ST_ADC)
+		set8(xpin->mode_reg, PinMode_ST_INPUT);
+	if(mode == PinMode_ST_ADC || mode == PinMode_ST_INPUT || mode == PinMode_ST_INPUT_PULLUP)
+		return get8(xpin->in_reg);
+	return 0;
+}
+
+int JsAr_t::expanderAnalogRead(uint8_t pin)
+{
+	const ExpanderPin_t* xpin = getExpanderPin(pin);
+	if(!xpin)
+		return 0;
+	uint8_t mode = regs[xpin->mode_reg];
+	if(mode < PinMode_ST_ADC)
+		return 0;
+	if(mode != PinMode_ST_ADC)
+	{
+		set8(xpin->mode_reg, PinMode_ST_ADC);
+		delay(1);
+	}
+	return get16(xpin->in_reg);
+}
+
+
+// void JsAr_t::pinMode(uint8_t pin, uint8_t mode)
+// {
+// 	const ExpanderPin_t* xpin = getExpanderPin(pin);
+// 	if(!xpin)
+// 	{
+// 		::pinMode(pin, mode);
+// 		return;
+// 	}
+
+// 	uint8_t old_mode = regs[xpin->mode_reg];
+// 	if(old_mode < PinMode_ST_ADC)
+// 	{
+// 		::pinMode(pin, mode);
+// 		return;
+// 	}
+	
+// 	switch(mode)
+// 	{
+// 		case INPUT: set8(xpin->mode_reg, PinMode_ST_INPUT); break;
+// 		case INPUT_PULLUP: set8(xpin->mode_reg, PinMode_ST_INPUT_PULLUP); break;
+// 		case OUTPUT: set8(xpin->mode_reg, PinMode_ST_OUTPUT); Serial.println("hello"); break;
+// 	}
+// }
+
+// void JsAr_t::digitalWrite(uint8_t pin, uint8_t value)
+// {
+// 	const ExpanderPin_t* xpin = getExpanderPin(pin);
+// 	if(!xpin)
+// 	{
+// 		::digitalWrite(pin, value);
+// 		return;
+// 	}
+
+// 	uint8_t mode = regs[xpin->mode_reg];
+// 	switch(mode)
+// 	{
+// 		case PinMode_DISABLED: 
+// 		case PinMode_ESP: 
+// 			::digitalWrite(pin, value);
+// 			break;
+// 		case PinMode_ESP_OUT: 
+// 			if(pin == 36 || pin == 25)
+// 				::digitalWrite(25, value);
+// 			else if(pin == 35 || pin == 26)
+// 				::digitalWrite(26, value);
+// 			break;
+// 		case PinMode_ST_PWM:
+// 			set8(xpin->mode_reg, PinMode_ST_OUTPUT);
+// 		case PinMode_ST_ADC:
+// 		case PinMode_ST_INPUT:
+// 		case PinMode_ST_INPUT_PULLUP:
+// 		case PinMode_ST_OUTPUT:
+// 		case PinMode_ST_OUTPUT_OPEN_DRAIN:
+// 			set8(xpin->out_reg, value);
+// 			break;
+// 	}
+// }
+
+// void JsAr_t::analogWrite(uint8_t pin, uint16_t value, uint16_t range)
+// {
+// 	const ExpanderPin_t* xpin = getExpanderPin(pin);
+// 	if(!xpin)
+// 		return;
+// 	uint8_t mode = regs[xpin->mode_reg];
+
+// 	switch(mode)
+// 	{
+// 		case PinMode_DISABLED: 
+// 		case PinMode_ESP:
+// 			break;
+// 		case PinMode_ST_OUTPUT:
+// 		case PinMode_ST_OUTPUT_OPEN_DRAIN:
+// 			set8(xpin->mode_reg, PinMode_ST_PWM);
+// 		case PinMode_ST_INPUT:
+// 		case PinMode_ST_INPUT_PULLUP:
+// 		case PinMode_ST_ADC:
+// 		case PinMode_ST_PWM:
+// 			if(range)
+// 			{
+// //				uint8_t tim = getExpanderTim(pin);
+// //				uint16_t* tim_pulse = tim == 2? regs + TIM2_PULSE: regs + TIM3_PULSE;
+// //				if(tim == 2 && (regs[TIM2_PULSE] != (range & 0xFF) || regs[TIM2_PULSE + 1] != (range >> 8))
+// //				{
+// //					set16()
+// //				}
+// 			} 
+// 			set16(xpin->out_reg, value <= 1024? value: 1024);
+// 			break;
+// 	}
+// }
 
 void JsAr_t::timMode(uint8_t tim, uint8_t prescaler, uint16_t pulse)
 {
@@ -287,36 +375,36 @@ void JsAr_t::timMode(uint8_t tim, uint8_t prescaler, uint16_t pulse)
 
 //void analogWriteFrequency(uint8_t pin, uint16_t value);
 
-int JsAr_t::digitalRead(uint8_t pin)
-{
-	const ExpanderPin_t* xpin = getExpanderPin(pin);
-	if(!xpin)
-		return ::digitalRead(pin);
-	uint8_t mode = regs[xpin->mode_reg];
-	if(mode < PinMode_ST_ADC)
-		return ::digitalRead(pin);
-	if(mode == PinMode_ST_ADC)
-		set8(xpin->mode_reg, PinMode_ST_INPUT);
-	if(mode == PinMode_ST_ADC || mode == PinMode_ST_INPUT || mode == PinMode_ST_INPUT_PULLUP)
-		return get8(xpin->in_reg);
-	return 0;
-}
+// int JsAr_t::digitalRead(uint8_t pin)
+// {
+// 	const ExpanderPin_t* xpin = getExpanderPin(pin);
+// 	if(!xpin)
+// 		return ::digitalRead(pin);
+// 	uint8_t mode = regs[xpin->mode_reg];
+// 	if(mode < PinMode_ST_ADC)
+// 		return ::digitalRead(pin);
+// 	if(mode == PinMode_ST_ADC)
+// 		set8(xpin->mode_reg, PinMode_ST_INPUT);
+// 	if(mode == PinMode_ST_ADC || mode == PinMode_ST_INPUT || mode == PinMode_ST_INPUT_PULLUP)
+// 		return get8(xpin->in_reg);
+// 	return 0;
+// }
 
-int JsAr_t::analogRead(uint8_t pin)
-{
-	const ExpanderPin_t* xpin = getExpanderPin(pin);
-	if(!xpin)
-		return ::analogRead(pin);
-	uint8_t mode = regs[xpin->mode_reg];
-	if(mode < PinMode_ST_ADC)
-		return ::analogRead(pin);
-	if(mode != PinMode_ST_ADC)
-	{
-		set8(xpin->mode_reg, PinMode_ST_ADC);
-		delay(1);
-	}
-	return get16(xpin->in_reg);
-}
+// int JsAr_t::analogRead(uint8_t pin)
+// {
+// 	const ExpanderPin_t* xpin = getExpanderPin(pin);
+// 	if(!xpin)
+// 		return ::analogRead(pin);
+// 	uint8_t mode = regs[xpin->mode_reg];
+// 	if(mode < PinMode_ST_ADC)
+// 		return ::analogRead(pin);
+// 	if(mode != PinMode_ST_ADC)
+// 	{
+// 		set8(xpin->mode_reg, PinMode_ST_ADC);
+// 		delay(1);
+// 	}
+// 	return get16(xpin->in_reg);
+// }
 /*
 void JsAr_t::disablePin(uint8_t pin)
 {
