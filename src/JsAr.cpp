@@ -95,41 +95,40 @@ static uint8_t* regs = JsArInterface.regs;
 
 int JsAr_t::begin(bool isEnableAllPins)
 {
-	delay(100);
+    delay(100);
 	JsArInterface.begin(1000000);
 	id = CONTROLLER_ID;
 
-	do
-	{
+	do {
 		unlockBootloader();
-	}while(JsArInterface.ping(BOOT_ID) != DYN_STATUS_OK);
-	delay(100);
+	} while (JsArInterface.ping(BOOT_ID) != DYN_STATUS_OK);	
+    delay(100);
 
-	do
-	{
+	do {
 		JsArInterface.write(BOOT_ID, DXL_LOCK_RESET_REG, (uint8_t)DXL_RESET_MAGIC);
 		delay(300);
-	}while(JsArInterface.ping(id) != DYN_STATUS_OK);
+	} while (JsArInterface.ping(id) != DYN_STATUS_OK);
 
 	Serial.println("ESP-JS-AR started");
 
-	for(int i = 0; i < 229; i++)
-	{
+	for (int i = 0; i < 229; i++) 
+    {
 		get8(i);
 	}
 	set8(ETHERNET_ENABLE, 1);
 	set8(ETHERNET_RST, 1);
 	set8(GPIO_PULL_UP_ENABLE, 1);
-	if(isEnableAllPins)
-	{
+
+	if (isEnableAllPins) 
+    {
 		set8(MISO_OUTPUT_EN, 1);
 		set8(D3_D7_PULL_UP_ENABLE, 1);
 		set8(SPI_MODE, SPI_MODE_5V);
 		set8(I2C_MODE, I2C_MODE_5V);
 		disableIrTx();
 
-		for(int i = A0_MODE; i <= D11_MODE; i++)
-		{
+		for (int i = A0_MODE; i <= D11_MODE; i++) 
+        {
 			set8(i, PinMode_ESP);
 		}
 	}
@@ -140,6 +139,7 @@ int JsAr_t::begin(bool isEnableAllPins)
 	}
 	
 	delay(100);
+    return 0;
 }
 
 void JsAr_t::enableEthernet() 			{set8(ETHERNET_ENABLE, 1); set8(ETHERNET_RST, 0);}
@@ -184,7 +184,7 @@ void JsAr_t::expanderWriteLed(uint8_t is_en)
 void JsAr_t::expanderPinMode(uint8_t pin, uint8_t mode)
 {
 	const ExpanderPin_t* xpin = getExpanderPin(pin);
-	if(!xpin)
+	if (!xpin)
 		return;
 	switch(mode)
 	{
