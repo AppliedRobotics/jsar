@@ -2,6 +2,7 @@
 #define __JS_AR_H
 
 #include  <stdint.h>
+#include "EspAnalogWrite.h"
 
 #define ESP_JS_AR (1)	
 
