@@ -11,7 +11,7 @@ void setup() {
     Serial.begin(115200);
     //JsAr.begin();
 
-    analogWriteFrequency(800);
+    jsArAnalogWriteFrequency(800);
     
 }
 
@@ -22,7 +22,7 @@ void loop() {
     brightStep = -brightStep;
     }
 
-    analogWrite(LED_1, brightness);
+    jsArAnalogWrite(LED_1, brightness);
 
     delay(5);
 }

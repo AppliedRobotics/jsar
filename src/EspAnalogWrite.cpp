@@ -1,6 +1,6 @@
 #include "EspAnalogWrite.h"
 
-analog_write_channel_t _analog_write_channels[16] = {
+js_ar_analog_write_channel_t _analog_write_channels[16] = {
     {-1, 5000, 13},
     {-1, 5000, 13},
     {-1, 5000, 13},
@@ -18,7 +18,7 @@ analog_write_channel_t _analog_write_channels[16] = {
     {-1, 5000, 13},
     {-1, 5000, 13}};
 
-int analogWriteChannel(uint8_t pin)
+int jsArAnalogWriteChannel(uint8_t pin)
 {
   int channel = -1;
 
@@ -51,7 +51,7 @@ int analogWriteChannel(uint8_t pin)
   return channel;
 }
 
-void analogWriteFrequency(double frequency)
+void jsArAnalogWriteFrequency(double frequency)
 {
   for (uint8_t i = 0; i < 16; i++)
   {
@@ -59,9 +59,9 @@ void analogWriteFrequency(double frequency)
   }
 }
 
-void analogWriteFrequency(uint8_t pin, double frequency)
+void jsArAnalogWriteFrequency(uint8_t pin, double frequency)
 {
-  int channel = analogWriteChannel(pin);
+  int channel = jsArAnalogWriteChannel(pin);
 
   // Make sure the pin was attached to a channel, if not do nothing
   if (channel != -1 && channel < 16)
@@ -71,7 +71,7 @@ void analogWriteFrequency(uint8_t pin, double frequency)
   }
 }
 
-void analogWriteResolution(uint8_t resolution)
+void jsArAnalogWriteResolution(uint8_t resolution)
 {
   for (uint8_t i = 0; i < 16; i++)
   {
@@ -79,9 +79,9 @@ void analogWriteResolution(uint8_t resolution)
   }
 }
 
-void analogWriteResolution(uint8_t pin, uint8_t resolution)
+void jsArAnalogWriteResolution(uint8_t pin, uint8_t resolution)
 {
-  int channel = analogWriteChannel(pin);
+  int channel = jsArAnalogWriteChannel(pin);
 
   // Make sure the pin was attached to a channel, if not do nothing
   if (channel != -1 && channel < 16)
@@ -90,9 +90,9 @@ void analogWriteResolution(uint8_t pin, uint8_t resolution)
   }
 }
 
-void analogWrite(uint8_t pin, uint32_t value, uint32_t valueMax)
+void jsArAnalogWrite(uint8_t pin, uint32_t value, uint32_t valueMax)
 {
-  int channel = analogWriteChannel(pin);
+  int channel = jsArAnalogWriteChannel(pin);
 
   // Make sure the pin was attached to a channel, if not do nothing
   if (channel != -1 && channel < 16)
