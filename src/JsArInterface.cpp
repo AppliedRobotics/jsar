@@ -1,5 +1,5 @@
 #include "JsArInterface.h"
-#include "DxlMaster.h"
+#include "DxlMaster2.h"
 #include "Arduino.h"
 
 //HardwareDynamixelInterface dxl(Serial);
@@ -14,14 +14,14 @@ JsArInterface_t JsArInterface(Serial);
 
 void JsArInterface_t::set8(uint8_t addr, uint8_t val)
 {
-	while(write(id, addr, val))
+	while(write(1, id, addr, val))
 		;
 	regs[addr] = val;
 }
 
 void JsArInterface_t::set16(uint8_t addr, uint16_t val)
 {
-	while(write(id, addr, val))
+	while(write(1, id, addr, val))
 		;
 	regs[addr] = val;
 	regs[addr + 1] = val >> 8;
@@ -29,7 +29,7 @@ void JsArInterface_t::set16(uint8_t addr, uint16_t val)
 uint8_t JsArInterface_t::get8(uint8_t addr)
 {
 	uint8_t val;
-	while(read(id, addr, val))
+	while(read(1, id, addr, val))
 		;
 	regs[addr] = val;
 	return val;
@@ -37,7 +37,7 @@ uint8_t JsArInterface_t::get8(uint8_t addr)
 uint16_t JsArInterface_t::get16(uint8_t addr)
 {
 	uint16_t val;
-	while(read(id, addr, val))
+	while(read(1, id, addr, val))
 		;
 	regs[addr] = val;
 	regs[addr + 1] = val >> 8;
@@ -46,14 +46,14 @@ uint16_t JsArInterface_t::get16(uint8_t addr)
 
 void JsArInterface_t::set(uint8_t addr, uint8_t size, uint8_t* data)
 {
-	while(write(id,  addr, size, data) != DYN_STATUS_OK)
+	while(write(1, id,  addr, size, data) != DYN_STATUS_OK)
 		;
 	memcpy(regs +  addr, data, size);
 }
 
 void JsArInterface_t::get(uint8_t addr, uint8_t size, uint8_t* data)
 {
-	while(read(id, addr, size, data) != DYN_STATUS_OK)
+	while(read(1, id, addr, size, data) != DYN_STATUS_OK)
 		;
 	memcpy(regs +  addr, data, size);
 }
