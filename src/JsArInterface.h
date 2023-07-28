@@ -1,8 +1,8 @@
 #ifndef __JS_AR_INTERFACE_H
 #define __JS_AR_INTERFACE_H
 
-#include "DxlMaster.h"
-#include "DynamixelInterface.h"
+#include "DxlMaster2.h"
+#include "DynamixelInterface2.h"
 #include "Arduino.h"
 #include "regs.h"
 
