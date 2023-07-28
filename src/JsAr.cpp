@@ -101,13 +101,13 @@ int JsAr_t::begin(bool isEnableAllPins)
 
 	do {
 		unlockBootloader();
-	} while (JsArInterface.ping(BOOT_ID) != DYN_STATUS_OK);	
+	} while (JsArInterface.ping(1, BOOT_ID) != DYN_STATUS_OK);	
     delay(100);
 
 	do {
-		JsArInterface.write(BOOT_ID, DXL_LOCK_RESET_REG, (uint8_t)DXL_RESET_MAGIC);
+		JsArInterface.write(1, BOOT_ID, DXL_LOCK_RESET_REG, (uint8_t)DXL_RESET_MAGIC);
 		delay(300);
-	} while (JsArInterface.ping(id) != DYN_STATUS_OK);
+	} while (JsArInterface.ping(1, id) != DYN_STATUS_OK);
 
 	Serial.println("ESP-JS-AR started");
 
@@ -440,7 +440,7 @@ int JsAr_t::updateFirmware()
 	JsArInterface.begin(1000000);
 	unlockBootloader();
 
-	while(JsArInterface.ping(BOOT_ID) != DYN_STATUS_OK)
+	while(JsArInterface.ping(1, BOOT_ID) != DYN_STATUS_OK)
 		;
 
 	const int BLOCK_SIZE = 128;
@@ -449,7 +449,7 @@ int JsAr_t::updateFirmware()
 	
 	Serial.setTimeout(2000);
 	
-	if(JsArInterface.write(BOOT_ID, 1, firmwareData, FIRMWARE_CRC_AND_ERASE_CMD_BLOCK_SIZE) != DYN_STATUS_OK)
+	if(JsArInterface.write(1, BOOT_ID, 1, firmwareData, FIRMWARE_CRC_AND_ERASE_CMD_BLOCK_SIZE) != DYN_STATUS_OK)
 		return -1;
 
 	// send firmware
@@ -466,7 +466,7 @@ int JsAr_t::updateFirmware()
 		uint8_t addr_and_data_block[BLOCK_SIZE + 1];
 		addr_and_data_block[0] = i;
 		memcpy(addr_and_data_block + 1, firmwareData + FIRMWARE_CRC_AND_ERASE_CMD_BLOCK_SIZE + i*BLOCK_SIZE, BLOCK_SIZE);
-		if(JsArInterface.write(BOOT_ID, 0, addr_and_data_block, BLOCK_SIZE + 1))
+		if(JsArInterface.write(1, BOOT_ID, 0, addr_and_data_block, BLOCK_SIZE + 1))
 			return -3 - i;
 		//delay(200);
 	}
@@ -475,20 +475,20 @@ int JsAr_t::updateFirmware()
 	Serial.setTimeout(10);
 	// get old application dynamixel id
 	uint8_t app_dxl_id;
-	if(JsArInterface.read(BOOT_ID, ID, app_dxl_id) != DYN_STATUS_OK)
+	if(JsArInterface.read(1, BOOT_ID, ID, app_dxl_id) != DYN_STATUS_OK)
 		return -99;
 
 	delay(1000);
-	JsArInterface.write(BOOT_ID, DXL_LOCK_RESET_REG, (uint8_t)DXL_RESET_MAGIC);
+	JsArInterface.write(1, BOOT_ID, DXL_LOCK_RESET_REG, (uint8_t)DXL_RESET_MAGIC);
 
 	delay(1000);
 
 	for(int i = 0; i < 10; i++)
 	{
 		delay(300);
-		if(JsArInterface.ping(CONTROLLER_ID) == DYN_STATUS_OK)
+		if(JsArInterface.ping(1, CONTROLLER_ID) == DYN_STATUS_OK)
 		{
-			JsArInterface.write(CONTROLLER_ID, LED, 1);
+			JsArInterface.write(1, CONTROLLER_ID, LED, 1);
 			return 0; //Success!
 		}
 	}
@@ -500,9 +500,9 @@ void JsAr_t::lockExpander(uint8_t packet_n)
 {
 	if(packet_n == DXL_RESET_MAGIC)
 		packet_n++;
-	JsArInterface.write(id, DXL_LOCK_RESET_REG, (uint8_t)packet_n);
-	JsArInterface.write(id, DXL_LOCK_RESET_REG, (uint8_t)packet_n);
-	JsArInterface.write(id, DXL_LOCK_RESET_REG, (uint8_t)packet_n);
+	JsArInterface.write(1, id, DXL_LOCK_RESET_REG, (uint8_t)packet_n);
+	JsArInterface.write(1, id, DXL_LOCK_RESET_REG, (uint8_t)packet_n);
+	JsArInterface.write(1, id, DXL_LOCK_RESET_REG, (uint8_t)packet_n);
 }
 
 void JsAr_t::unlockExpander()
@@ -512,7 +512,7 @@ void JsAr_t::unlockExpander()
 
 void JsAr_t::unlockBootloader()
 {
-	while(JsArInterface.write(BOOT_ID, DXL_LOCK_RESET_REG, (uint8_t)0))
+	while(JsArInterface.write(1, BOOT_ID, DXL_LOCK_RESET_REG, (uint8_t)0))
 		;
 }
 
